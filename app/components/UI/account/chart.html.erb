@@ -17,7 +17,7 @@
       </div>
     </div>
 
-    <%= form_with url: account_path(account), method: :get, data: { controller: "auto-submit-form" } do |form| %>
+    <%= form_with url: account_path(account), method: :get, data: { controller: "auto-submit-form custom-period" } do |form| %>
       <div class="flex items-center gap-2">
         <% if account.investment? %>
           <%= form.select :chart_view,
@@ -27,12 +27,80 @@
             data: { "auto-submit-form-target": "auto" } %>
         <% end %>
 
-        <%= form.select :period,
-                    Period.as_options,
-                    { selected: period.key },
-                    data: { "auto-submit-form-target": "auto" },
-                    class: "bg-container border border-secondary rounded-lg px-3 py-2 text-sm pr-7 cursor-pointer text-primary focus:outline-hidden focus:ring-0" %>
+        <div class="flex items-center gap-2">
+          <button type="button"
+                  data-custom-period-target="changeButton"
+                  data-action="click->custom-period#openCustomModal"
+                  class="bg-container border border-secondary rounded-lg px-3 py-2 text-sm text-primary hover:bg-container-inset focus:outline-hidden focus:ring-0 whitespace-nowrap"
+                  style="display: none;">
+            Change Dates
+          </button>
+
+          <%= form.select :period,
+                      Period.as_options + [["Custom", "custom"]],
+                      { selected: period.key || (period.start_date && period.end_date ? "custom" : nil) },
+                      data: { action: "change->custom-period#toggle" },
+                      class: "bg-container border border-secondary rounded-lg px-3 py-2 text-sm pr-7 cursor-pointer text-primary focus:outline-hidden focus:ring-0" %>
+        </div>
+
+        <!-- Hidden fields for custom dates -->
+        <% if period.key.nil? && period.start_date && period.end_date %>
+          <%= form.hidden_field :start_date, value: period.start_date %>
+          <%= form.hidden_field :end_date, value: period.end_date %>
+        <% end %>
       </div>
+
+      <!-- Custom Date Modal -->
+      <dialog data-custom-period-target="modal"
+              class="w-full h-full bg-transparent theme-dark:backdrop:bg-alpha-black-900 backdrop:bg-overlay lg:p-1"
+              data-controller="DS--dialog"
+              data-DS__dialog_auto_open_value="false"
+              data-action="mousedown->DS--dialog#clickOutside"
+              style="display: none;">
+        <div class="flex h-full w-full items-center justify-center">
+          <div class="flex flex-col bg-container rounded-xl shadow-border-xs mx-3 lg:mx-0 w-full max-h-full lg:max-w-[550px] overflow-hidden" data-DS__dialog_target="content">
+            <div class="grow overflow-y-auto py-4 space-y-4 flex flex-col">
+              <header class="px-4 flex flex-col gap-2">
+                <div class="flex items-center justify-between gap-2">
+                  <h2 class="font-medium text-primary">Select Custom Date Range</h2>
+                  <button type="button"
+                          data-action="click->custom-period#closeModal"
+                          class="ml-auto p-1 rounded-md hover:bg-container-inset focus:outline-none focus:ring-2 focus:ring-gray-500">
+                    <%= helpers.icon("x", class: "w-5 h-5 text-secondary") %>
+                  </button>
+                </div>
+              </header>
+
+              <div class="px-4 grow">
+                <div class="space-y-4">
+                  <div class="form-field">
+                    <label class="form-field__label">Start Date</label>
+                    <input type="date"
+                           data-custom-period-target="startDate"
+                           value="<%= params[:start_date] || (period.key.nil? ? period.start_date : nil) %>"
+                           class="form-field__input"
+                           autocomplete="off">
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-field__label">End Date</label>
+                    <input type="date"
+                           data-custom-period-target="endDate"
+                           value="<%= params[:end_date] || (period.key.nil? ? period.end_date : nil) %>"
+                           class="form-field__input"
+                           autocomplete="off">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 justify-end p-4">
+              <%= render DS::Button.new(text: "Cancel", variant: "ghost", type: "button", data: { action: "click->custom-period#closeModal" }) %>
+              <%= render DS::Button.new(text: "Apply Dates", type: "button", data: { action: "click->custom-period#submitCustomDates" }) %>
+            </div>
+          </div>
+        </div>
+      </dialog>
     <% end %>
   </div>
 

@@ -9,7 +9,12 @@ class PagesController < ApplicationController
 
     # Handle cashflow period
     cashflow_period_param = params[:cashflow_period]
-    @cashflow_period = if cashflow_period_param.present?
+    @cashflow_period = if cashflow_period_param == "custom" && params[:start_date].present? && params[:end_date].present?
+      Period.custom(
+        start_date: Date.parse(params[:start_date]),
+        end_date: Date.parse(params[:end_date])
+      )
+    elsif cashflow_period_param.present?
       begin
         Period.from_key(cashflow_period_param)
       rescue Period::InvalidKeyError
@@ -21,7 +26,12 @@ class PagesController < ApplicationController
 
     # Handle outflows period
     outflows_period_param = params[:outflows_period]
-    @outflows_period = if outflows_period_param.present?
+    @outflows_period = if outflows_period_param == "custom" && params[:start_date].present? && params[:end_date].present?
+      Period.custom(
+        start_date: Date.parse(params[:start_date]),
+        end_date: Date.parse(params[:end_date])
+      )
+    elsif outflows_period_param.present?
       begin
         Period.from_key(outflows_period_param)
       rescue Period::InvalidKeyError
@@ -42,6 +52,12 @@ class PagesController < ApplicationController
     outflows_expense_totals = Current.family.income_statement.expense_totals(period: @outflows_period)
     @outflows_data = build_outflows_donut_data(outflows_expense_totals)
 
+    @breadcrumbs = [ [ "Home", root_path ], [ "Dashboard", nil ] ]
+  rescue Date::Error
+    @cashflow_period = Period.last_30_days
+    @outflows_period = Period.last_30_days
+    @cashflow_sankey_data = build_cashflow_sankey_data({}, {}, Current.family.currency)
+    @outflows_data = build_outflows_donut_data({})
     @breadcrumbs = [ [ "Home", root_path ], [ "Dashboard", nil ] ]
   end
 
