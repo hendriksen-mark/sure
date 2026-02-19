@@ -308,7 +308,8 @@ export default class extends Controller {
     linkPaths
       .on("mouseenter", (event, d) => {
         applyHover([d]);
-        this.#showTooltip(event, d.value, d.percentage);
+        const linkTitle = `${d.source.name} → ${d.target.name}`;
+        this.#showTooltip(event, d.value, d.percentage, linkTitle);
       })
       .on("mousemove", event => this.#updateTooltipPosition(event))
       .on("mouseleave", () => {
