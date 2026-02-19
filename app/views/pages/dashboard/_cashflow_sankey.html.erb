@@ -10,12 +10,30 @@
     <% end %>
   </div>
   <% if sankey_data[:links].present? %>
-    <div class="w-full h-96">
+    <div
+      data-controller="resizable"
+      data-resizable-storage-key-value="cashflow-sankey-height"
+      data-resizable-min-height-value="200"
+      data-resizable-max-height-value="1200"
+      data-resizable-default-height-value="600"
+      class="w-full relative">
+      <div data-resizable-target="container" class="w-full">
+        <div
+          data-controller="sankey-chart"
+          data-sankey-chart-data-value="<%= sankey_data.to_json %>"
+          data-sankey-chart-currency-symbol-value="<%= sankey_data[:currency_symbol] %>"
+          class="w-full h-full"></div>
+      </div>
       <div
-        data-controller="sankey-chart"
-        data-sankey-chart-data-value="<%= sankey_data.to_json %>"
-        data-sankey-chart-currency-symbol-value="<%= sankey_data[:currency_symbol] %>"
-        class="w-full h-full"></div>
+        data-resizable-target="handle"
+        data-action="mousedown->resizable#startResize touchstart->resizable#startResize"
+        class="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize flex items-center justify-center group hover:bg-gray-200 transition-colors"
+        role="slider"
+        aria-valuemin="200"
+        aria-valuemax="1200"
+        tabindex="0">
+        <div class="w-12 h-1 bg-gray-300 rounded-full group-hover:bg-gray-400 transition-colors"></div>
+      </div>
     </div>
     <%= render DS::Dialog.new(id: "cashflow-expanded-dialog", auto_open: false, width: "custom", disable_frame: true, content_class: "!w-[96vw] max-w-[1650px]", data: { action: "close->cashflow-expand#restore" }) do |dialog| %>
       <% dialog.with_header(title: t("pages.dashboard.cashflow_sankey.title")) %>
