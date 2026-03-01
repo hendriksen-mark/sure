@@ -20,7 +20,7 @@ jobs:
             const apiKey = process.env.MINTLIFY_API_KEY;
 
             if (!projectId || !apiKey) {
-              core.setFailed('Missing MINTLIFY_PROJECT_ID or MINTLIFY_API_KEY secrets');
+              core.notice('Skipping documentation update - MINTLIFY_PROJECT_ID or MINTLIFY_API_KEY secrets not configured');
               return;
             }
 
