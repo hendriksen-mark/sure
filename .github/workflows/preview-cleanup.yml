@@ -137,6 +137,11 @@ jobs:
           fi
 
           # Get list of all preview workers
+          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ] || [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "Cloudflare credentials not configured; skipping cleanup"
+            exit 0
+          fi
+
           echo "Fetching list of preview workers..."
 
           # Use Cloudflare API to list workers and read modified_on from the list response.
@@ -145,7 +150,7 @@ jobs:
             "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts" \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             -H "Content-Type: application/json") || {
-              echo "Failed to fetch preview worker list from Cloudflare"
+              echo "Failed to fetch preview worker list from Cloudflare (account: ${CLOUDFLARE_ACCOUNT_ID:0:8}...)"
               exit 1
             }
 
