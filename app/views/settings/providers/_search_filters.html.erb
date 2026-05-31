@@ -9,15 +9,28 @@
     }
   ) %>
   <div class="inline-flex items-center gap-1 p-1 bg-surface-inset rounded-xl">
-    <% %w[all bank crypto investment].each do |kind| %>
+    <% ([ "all" ] + Provider::Metadata.kinds).each do |kind| %>
       <% active = kind == "all" %>
       <button type="button"
               data-providers-filter-target="chip"
               data-action="click->providers-filter#selectChip"
-              data-kind="<%= kind %>"
+              data-kind="<%= kind.downcase %>"
               aria-pressed="<%= active %>"
               class="px-2.5 py-1 text-xs font-medium rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-alpha-black-100 <%= active ? "bg-container shadow-border-xs text-primary" : "text-secondary" %>">
-        <%= t("settings.providers.search_filters.chips.#{kind}") %>
+        <%= t("settings.providers.search_filters.chips.#{kind.downcase}") %>
+      </button>
+    <% end %>
+  </div>
+  <div class="inline-flex items-center gap-1 p-1 bg-surface-inset rounded-xl">
+    <% ([ "all" ] + Provider::Metadata.regions).each do |region| %>
+      <% active = region == "all" %>
+      <button type="button"
+              data-providers-filter-target="regionChip"
+              data-action="click->providers-filter#selectRegionChip"
+              data-region="<%= region.downcase %>"
+              aria-pressed="<%= active %>"
+              class="px-2.5 py-1 text-xs font-medium rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-alpha-black-100 <%= active ? "bg-container shadow-border-xs text-primary" : "text-secondary" %>">
+        <%= region == "all" ? t("settings.providers.search_filters.region_chips.all") : region %>
       </button>
     <% end %>
   </div>

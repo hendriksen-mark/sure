@@ -338,6 +338,8 @@ en:
           bank: Banks
           crypto: Crypto
           investment: Investments
+        region_chips:
+          all: All
       empty_filter: No providers match your filter.
       clear_filter: Clear filters
       encryption_error:

@@ -18,6 +18,14 @@ class Provider
       plaid_eu:       { name: "Plaid EU", region: "EU",        kind: "Bank",       tier: "Paid", maturity: :stable, logo_text: "PL", logo_bg: "bg-indigo-600" }
     }.freeze
 
+    def self.kinds
+      REGISTRY.values.map { |m| m[:kind] }.compact.uniq
+    end
+
+    def self.regions
+      REGISTRY.values.map { |m| m[:region] }.compact.uniq
+    end
+
     def self.for(provider_key)
       REGISTRY[provider_key.to_sym] || { logo_text: provider_key.to_s.first(2).upcase, logo_bg: "bg-gray-500" }
     end

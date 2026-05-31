@@ -5,11 +5,12 @@ import { Controller } from "@hotwired/stimulus";
 // Updates the visible-count target on the section heading and toggles
 // an empty-state target when no card matches.
 export default class extends Controller {
-  static targets = ["input", "chip", "card", "empty", "count"];
-  static values = { kind: { type: String, default: "all" } };
+  static targets = ["input", "chip", "regionChip", "card", "empty", "count"];
+  static values = { kind: { type: String, default: "all" }, region: { type: String, default: "all" } };
 
   connect() {
     this.syncChipState();
+    this.syncRegionChipState();
   }
 
   filter() {
@@ -17,6 +18,7 @@ export default class extends Controller {
       ? this.inputTarget.value.toLocaleLowerCase().trim()
       : "";
     const activeKind = this.kindValue;
+    const activeRegion = this.regionValue;
     let visibleCount = 0;
 
     this.cardTargets.forEach((card) => {
@@ -26,7 +28,8 @@ export default class extends Controller {
       const haystack = `${name} ${region} ${kind}`;
       const matchesQuery = !query || haystack.includes(query);
       const matchesKind = activeKind === "all" || kind === activeKind;
-      const visible = matchesQuery && matchesKind;
+      const matchesRegion = activeRegion === "all" || region.includes(activeRegion);
+      const visible = matchesQuery && matchesKind && matchesRegion;
       card.classList.toggle("hidden", !visible);
       if (visible) visibleCount++;
     });
@@ -46,10 +49,18 @@ export default class extends Controller {
     this.filter();
   }
 
+  selectRegionChip(event) {
+    this.regionValue = event.currentTarget.dataset.region ?? "all";
+    this.syncRegionChipState();
+    this.filter();
+  }
+
   clear() {
     if (this.hasInputTarget) this.inputTarget.value = "";
     this.kindValue = "all";
+    this.regionValue = "all";
     this.syncChipState();
+    this.syncRegionChipState();
     this.filter();
     if (this.hasInputTarget) this.inputTarget.focus();
   }
@@ -58,6 +69,18 @@ export default class extends Controller {
     if (!this.hasChipTarget) return;
     this.chipTargets.forEach((chip) => {
       const active = chip.dataset.kind === this.kindValue;
+      chip.classList.toggle("bg-container", active);
+      chip.classList.toggle("shadow-border-xs", active);
+      chip.classList.toggle("text-primary", active);
+      chip.classList.toggle("text-secondary", !active);
+      chip.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+  }
+
+  syncRegionChipState() {
+    if (!this.hasRegionChipTarget) return;
+    this.regionChipTargets.forEach((chip) => {
+      const active = chip.dataset.region === this.regionValue;
       chip.classList.toggle("bg-container", active);
       chip.classList.toggle("shadow-border-xs", active);
       chip.classList.toggle("text-primary", active);
