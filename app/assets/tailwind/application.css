@@ -230,3 +230,12 @@
     transparent calc(100% - 1rem)
   );
 }
+
+/* Provider logo: hue is set inline; saturation/lightness adapt to theme */
+.provider-logo {
+  background-color: hsl(var(--logo-hue), 79%, 43%);
+}
+
+[data-theme=dark] .provider-logo {
+  background-color: hsl(var(--logo-hue), 70%, 35%);
+}
